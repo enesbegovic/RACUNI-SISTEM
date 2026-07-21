@@ -269,3 +269,50 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 	IzvrsiUpit("COMMIT;", "GRESKA PRI COMMIT-u");
 	cout << "TRANSAKCIJA ZAVRSENA-RACUN I STAVKE USPJESNO DODANI" << endl;
 }
+void Baza::PrikaziSveRacune() {
+	sqlite3_stmt* stmt;
+	string sql =
+		"SELECT Kupci.ImePrezime, Racuni.BrojRacuna, Racuni.DatumKupovine, Artikli.Naziv, Artikli.SerijskiBroj, Artikli.Cijena, Stavke.Kolicina "
+		"FROM Racuni "
+		"JOIN Kupci ON Racuni.KupacID=Kupci.ID "
+		"JOIN Stavke ON Racuni.ID=Stavke.RacunID "
+		"JOIN Artikli ON Stavke.ArtikalID=Artikli.ID "
+		"ORDER BY Racuni.ID;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
+		return;
+	}
+	string trenutniRacun = "";
+	double UkupanRacun = 0;
+	while (sqlite3_step(stmt)==SQLITE_ROW) {
+		string ImePrezime = (const char*)sqlite3_column_text(stmt, 0);
+		string BrojRacuna = (const char*)sqlite3_column_text(stmt, 1);
+		string Datum = (const char*)sqlite3_column_text(stmt, 2);
+		string Naziv = (const char*)sqlite3_column_text(stmt, 3);
+		string SerijskiBroj = (const char*)sqlite3_column_text(stmt, 4);
+		double Cijena = sqlite3_column_double(stmt, 5);
+		double Kolicina = sqlite3_column_double(stmt, 6);
+
+		
+		if (trenutniRacun != BrojRacuna) {
+			if (trenutniRacun != "") {
+				cout << "Ukupan Iznos Racuna:" << UkupanRacun << endl;
+				cout << "---" << endl;
+			}
+			cout << "Ime i Prezime Kupca:" << ImePrezime << endl;
+			cout << "Broj Racuna:" << BrojRacuna << endl;
+			cout << "Datum Kreiranja Racuna:" << Datum << endl;
+			trenutniRacun = BrojRacuna;
+			UkupanRacun = 0;
+		}
+		cout << "Kupljeni Artikli:" << endl;
+		cout << Naziv << " -Serijski Broj:" << SerijskiBroj << " -Cijena:" << Cijena << " KM -Kolicina:" << Kolicina << endl;
+		UkupanRacun += Cijena * Kolicina;
+	}
+	if (trenutniRacun != "") {
+		cout << "Ukupan Iznos Racuna:" << UkupanRacun << endl;
+		cout << "---" << endl;
+	}
+	sqlite3_finalize(stmt);
+}
