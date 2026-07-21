@@ -12,4 +12,8 @@ public:
 	void IzvrsiUpit(string sql, string PORUKAGRESKE);
 	void KreirajTabele();
 	void KreirajIndex();
+	void DodajArtikal(string Naziv, string SerijskiBroj, double Cijena);
+	void PrikaziSveArtikle();
+	void DodajKupca(string ImePrezime, string JMBG);
+	void PrikaziSveKupce();
 };
