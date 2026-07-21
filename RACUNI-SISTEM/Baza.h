@@ -16,4 +16,5 @@ public:
 	void PrikaziSveArtikle();
 	void DodajKupca(string ImePrezime, string JMBG);
 	void PrikaziSveKupce();
+	void DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacuna, string DatumKupovine, vector < pair < string, double >> StavkeRacuna);
 };

@@ -8,4 +8,5 @@ int main() {
 	baza.KreirajTabele();
 	baza.KreirajIndex();
 	cout << "GOTOVO" << endl;
+	
 }

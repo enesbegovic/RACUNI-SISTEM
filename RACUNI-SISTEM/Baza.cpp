@@ -179,3 +179,93 @@ void Baza::PrikaziSveKupce() {
 	}
 	sqlite3_finalize(stmt);
 }
+void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string DatumKupovine, vector<pair<string, double>>StavkeRacuna) {
+	IzvrsiUpit("BEGIN TRANSACTION;", "GRESKA PRI POKRETANJU TRANSAKNCIJE");
+	sqlite3_stmt* stmtProvjeraKupca;
+	int KupacID = 0;
+	string sqlProvjerKupca =
+		"SELECT ID FROM Kupci WHERE JMBG=?;";
+	int rc = sqlite3_prepare_v2(db, sqlProvjerKupca.c_str(), -1, &stmtProvjeraKupca, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI PROVJERE KUPCA:" << sqlite3_errmsg(db) << endl;
+		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+		return;
+	}
+	sqlite3_bind_text(stmtProvjeraKupca, 1, KupacJMBG.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmtProvjeraKupca) == SQLITE_ROW) {
+		KupacID = sqlite3_column_int(stmtProvjeraKupca, 0);
+	}
+	sqlite3_finalize(stmtProvjeraKupca);
+	if (KupacID == 0) {
+		cout << "GRESKA PRI DODAVANJU RACUNA-TRAZENI KUPAC NE POSTOJI" << endl;
+		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+		return;
+	}
+	sqlite3_stmt* stmtRacun;
+	string sqlRacun =
+		"INSERT INTO Racuni(KupacID, BrojRacuna, DatumKupovine) VALUES(?, ?, ?);";
+	int rc1 = sqlite3_prepare_v2(db, sqlRacun.c_str(), -1, &stmtRacun, nullptr);
+	if (rc1 != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI DODAVANJA RACUNA:" << sqlite3_errmsg(db) << endl;
+		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+		return;
+	}
+	sqlite3_bind_text(stmtRacun, 1, to_string(KupacID).c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmtRacun, 2, BrojRacun.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmtRacun, 3, DatumKupovine.c_str(), -1, SQLITE_TRANSIENT);
+	rc1 = sqlite3_step(stmtRacun);
+	sqlite3_finalize(stmtRacun);
+	if (rc1 != SQLITE_DONE) {
+		cout << "GRESKA PRI DODAVANJU RACUNA:" << sqlite3_errmsg(db) << endl;
+		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+		return;
+	}
+
+	int RacunID = sqlite3_last_insert_rowid(db);
+	for (auto& x : StavkeRacuna) {
+		string SerijskiBroj = x.first;
+		double Kolicina = x.second;
+
+		sqlite3_stmt* stmtArtikal;
+		int ArtikalID = 0;
+		string sqlArtikal =
+			"SELECT ID FROM Artikli WHERE SerijskiBroj=?;";
+		int rc2 = sqlite3_prepare_v2(db, sqlArtikal.c_str(), -1, &stmtArtikal, nullptr);
+		if (rc2 != SQLITE_OK) {
+			cout << "GRESKA PRI PRIPREMI PROVJERE ARTIKLA:" << sqlite3_errmsg(db) << endl;
+			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+			return;
+		}
+		sqlite3_bind_text(stmtArtikal, 1, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
+		if (sqlite3_step(stmtArtikal) == SQLITE_ROW) {
+			ArtikalID = sqlite3_column_int(stmtArtikal, 0);
+		}
+		sqlite3_finalize(stmtArtikal);
+		if (ArtikalID == 0) {
+			cout << "GRESKA PRI DODAVANJU STAVKI RACUNA-NE POSTOJI TRAZENI ARTIKAL" << endl;
+			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+			return;
+		}
+		sqlite3_stmt* stmtStavke;
+		string sqlStavke =
+			"INSERT INTO Stavke(RacunID, ArtikalID, Kolicina) VALUES(?, ?, ?);";
+		int rc3 = sqlite3_prepare_v2(db, sqlStavke.c_str(), -1, &stmtStavke, nullptr);
+		if (rc3 != SQLITE_OK) {
+			cout << "GRESKA PRI PRIPREMI DODAVANJA STAVKI RACUNA:" << sqlite3_errmsg(db) << endl;
+			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+			return;
+		}
+		sqlite3_bind_text(stmtStavke, 1, to_string(RacunID).c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmtStavke, 2, to_string(ArtikalID).c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmtStavke, 3, to_string(Kolicina).c_str(), -1, SQLITE_TRANSIENT);
+		rc3 = sqlite3_step(stmtStavke);
+		sqlite3_finalize(stmtStavke);
+		if (rc3 != SQLITE_DONE) {
+			cout << "GRESKA PRI DODAVANJU STAVKI RACUNA:" << sqlite3_errmsg(db) << endl;
+			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
+			return;
+		}
+	}
+	IzvrsiUpit("COMMIT;", "GRESKA PRI COMMIT-u");
+	cout << "TRANSAKCIJA ZAVRSENA-RACUN I STAVKE USPJESNO DODANI" << endl;
+}
