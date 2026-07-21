@@ -18,4 +18,5 @@ public:
 	void PrikaziSveKupce();
 	void DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacuna, string DatumKupovine, vector < pair < string, double >> StavkeRacuna);
 	void PrikaziSveRacune();
+	void PrikaziKupcaSaNajvecimTroskom();
 };

@@ -317,3 +317,36 @@ void Baza::PrikaziSveRacune() {
 	}
 	sqlite3_finalize(stmt);
 }
+void Baza::PrikaziKupcaSaNajvecimTroskom() {
+	sqlite3_stmt* stmt;
+	string sql =
+		"SELECT Kupci.ImePrezime, Racuni.BrojRacuna, Racuni.DatumKupovine, "
+		"SUM(Artikli.Cijena * Stavke.Kolicina) AS UkupanRacun "
+		"FROM Racuni "
+		"JOIN Kupci ON Racuni.KupacID=Kupci.ID "
+		"JOIN Stavke ON Racuni.ID=Stavke.RacunID "
+		"JOIN Artikli ON Stavke.ArtikalID=Artikli.ID "
+		"GROUP BY Racuni.ID "
+		"ORDER BY UkupanRacun DESC "
+		"LIMIT 1;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
+		return;
+	}
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		string ImePrezime = (const char*)sqlite3_column_text(stmt, 0);
+		string BrojRacuna = (const char*)sqlite3_column_text(stmt, 1);
+		string Datum = (const char*)sqlite3_column_text(stmt, 2);
+		double UkupanIznos = sqlite3_column_double(stmt, 3);
+
+		cout << "Ime i Prezime Kupca:" << ImePrezime << endl;
+		cout << "Broj Racuna:" << BrojRacuna << endl;
+		cout << "Datum Kreiranja Racuna:" << Datum << endl;
+		cout << "Ukupan Iznos Racuna:" << UkupanIznos << endl;
+	}
+	else {
+		cout << "NEMA PODATAKA" << endl;
+	}
+	sqlite3_finalize(stmt);
+}

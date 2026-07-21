@@ -16,7 +16,8 @@ int main() {
 		cout << "4.Prikazi Sve Kupce" << endl;
 		cout << "5.Kreiraj Racun" << endl;
 		cout << "6.Prikazi Sve Racune" << endl;
-		cout << "7.Izlaz" << endl;
+		cout << "7.Prikazi Kupca Sa Najvecim Racunom" << endl;
+		cout << "8.Izlaz" << endl;
 		cin >> izbor;
 		cin.ignore();
 		switch (izbor) {
@@ -99,6 +100,11 @@ int main() {
 		}
 		case 7:
 		{
+			baza.PrikaziKupcaSaNajvecimTroskom();
+			break;
+		}
+		case 8:
+		{
 			cout << "DOVIDJENJA" << endl;
 			break;
 		}
@@ -108,6 +114,6 @@ int main() {
 			break;
 		}
 		}
-	} while (izbor != 7);
+	} while (izbor != 8);
 	
 }
