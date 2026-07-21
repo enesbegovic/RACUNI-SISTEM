@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="RACUNI-SISTEM/RACUNI-SISTEM.vcxproj" />
+  <Project Path="RACUNI-SISTEM/RACUNI-SISTEM.vcxproj" Id="bf906fb9-4b1f-45a1-b687-f321e2bc0a32" />
 </Solution>

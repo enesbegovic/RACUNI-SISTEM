@@ -221,7 +221,7 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 		return;
 	}
 
-	int RacunID = sqlite3_last_insert_rowid(db);
+	int RacunID = (int)sqlite3_last_insert_rowid(db);
 	for (auto& x : StavkeRacuna) {
 		string SerijskiBroj = x.first;
 		double Kolicina = x.second;
@@ -305,8 +305,9 @@ void Baza::PrikaziSveRacune() {
 			cout << "Datum Kreiranja Racuna:" << Datum << endl;
 			trenutniRacun = BrojRacuna;
 			UkupanRacun = 0;
+			cout << "Kupljeni Artikli:" << endl;
 		}
-		cout << "Kupljeni Artikli:" << endl;
+		
 		cout << Naziv << " -Serijski Broj:" << SerijskiBroj << " -Cijena:" << Cijena << " KM -Kolicina:" << Kolicina << endl;
 		UkupanRacun += Cijena * Kolicina;
 	}
