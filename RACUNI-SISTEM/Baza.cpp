@@ -3,8 +3,8 @@
 #include<vector>
 #include"Baza.h"
 using namespace std;
-Baza::Baza() {
-	sqlite3_open("RACUNI-SISTEM.db", &db);
+Baza::Baza(string putanjaBaze) {
+	sqlite3_open(putanjaBaze.c_str(), &db);
 	sqlite3_exec(db, "PRAGMA foreign_keys=ON;", nullptr, nullptr, nullptr);
 }
 Baza::~Baza() {
@@ -121,6 +121,22 @@ void Baza::PrikaziSveArtikle() {
 	}
 	sqlite3_finalize(stmt);
 }
+int Baza::brojArtikala() {
+	sqlite3_stmt* stmt;
+	string sql =
+		"SELECT COUNT (*) FROM Artikli;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI BROJANJA ARTIKALA:" << sqlite3_errmsg(db) << endl;
+		return -1;
+	}
+	int count = 0;
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt, 0);
+	}
+	sqlite3_finalize(stmt);
+	return count;
+}
 void Baza::DodajKupca(string ImePrezime, string JMBG) {
 	sqlite3_stmt* stmtProvjera;
 	int count = 0;
@@ -178,6 +194,22 @@ void Baza::PrikaziSveKupce() {
 		cout << "---" << endl;
 	}
 	sqlite3_finalize(stmt);
+}
+int Baza::brojKupaca() {
+	sqlite3_stmt* stmt;
+	string sql =
+		"SELECT COUNT (*) FROM Kupci;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI BROJANJA KUPACA:" << sqlite3_errmsg(db) << endl;
+		return -1;
+	}
+	int count = 0;
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt, 0);
+	}
+	sqlite3_finalize(stmt);
+	return count;
 }
 void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string DatumKupovine, vector<pair<string, double>>StavkeRacuna) {
 	IzvrsiUpit("BEGIN TRANSACTION;", "GRESKA PRI POKRETANJU TRANSAKNCIJE");
@@ -316,6 +348,38 @@ void Baza::PrikaziSveRacune() {
 		cout << "---" << endl;
 	}
 	sqlite3_finalize(stmt);
+}
+int Baza::BrojRacuna() {
+	sqlite3_stmt* stmt;
+	string sql =
+		"SELECT COUNT (*) FROM Racuni;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI BROJANJU RACUNA:" << sqlite3_errmsg(db) << endl;
+		return -1;
+	}
+	int count = 0;
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt, 0);
+	}
+	sqlite3_finalize(stmt);
+	return count;
+}
+int Baza::BrojStavkiRacuna() {
+	sqlite3_stmt*stmt;
+	string sql =
+		"SELECT COUNT (*) FROM Stavke;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI BROJANJU STAVKI RACUNA:" << sqlite3_errmsg(db) << endl;
+		return -1;
+	}
+	int count = 0;
+	if (sqlite3_step(stmt) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt, 0);
+	}
+	sqlite3_finalize(stmt);
+	return count;
 }
 void Baza::PrikaziKupcaSaNajvecimTroskom() {
 	sqlite3_stmt* stmt;
