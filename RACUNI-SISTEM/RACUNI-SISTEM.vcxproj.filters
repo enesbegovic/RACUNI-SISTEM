@@ -32,5 +32,8 @@
     <ClInclude Include="Baza.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StmtGuard.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

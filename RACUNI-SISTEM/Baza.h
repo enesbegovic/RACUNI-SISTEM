@@ -3,6 +3,7 @@
 #include<string>
 #include<vector>
 #include"sqlite3.h"
+#include "StmtGuard.h"
 using namespace std;
 class Baza {
 	sqlite3* db;
