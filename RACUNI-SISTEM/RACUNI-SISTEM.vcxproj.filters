@@ -32,7 +32,7 @@
     <ClInclude Include="Baza.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StmtGuard.h">
+    <ClInclude Include="StmtPtr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -68,10 +68,10 @@ void Baza::DodajArtikal(string Naziv, string SerijskiBroj, double Cijena) {
 		cout << "GRESKA PRI PRIPREMI PROVJERE:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmtProvjera(rawStmtProvjera);
-	sqlite3_bind_text(stmtProvjera, 1, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
-	if (sqlite3_step(stmtProvjera) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmtProvjera, 0);
+	StmtPtr stmtProvjera(rawStmtProvjera);
+	sqlite3_bind_text(stmtProvjera.get(), 1, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmtProvjera.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmtProvjera.get(), 0);
 	}
 
 	if (count > 0) {
@@ -86,12 +86,12 @@ void Baza::DodajArtikal(string Naziv, string SerijskiBroj, double Cijena) {
 		cout << "GRESKA PRI PRIPREMI DODAVANJA ARTIKLA:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
-	sqlite3_bind_text(stmt, 1, Naziv.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 2, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 3, to_string(Cijena).c_str(), -1, SQLITE_TRANSIENT);
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, Naziv.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt.get(), 2, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt.get(), 3, to_string(Cijena).c_str(), -1, SQLITE_TRANSIENT);
 
-	rc1 = sqlite3_step(stmt);
+	rc1 = sqlite3_step(stmt.get());
 	if (rc1 != SQLITE_DONE) {
 		cout << "GRESKA PRI DODAVANJU ARTIKLA:" << sqlite3_errmsg(db) << endl;
 		return;
@@ -107,12 +107,12 @@ void Baza::PrikaziSveArtikle() {
 		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
-	while (sqlite3_step(stmt) == SQLITE_ROW) {
-		int ID = sqlite3_column_int(stmt, 0);
-		string Naziv = (const char*)sqlite3_column_text(stmt, 1);
-		string SerijskiBroj = (const char*)sqlite3_column_text(stmt, 2);
-		double Cijena = sqlite3_column_double(stmt, 3);
+	StmtPtr stmt(rawStmt);
+	while (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		int ID = sqlite3_column_int(stmt.get(), 0);
+		string Naziv = (const char*)sqlite3_column_text(stmt.get(), 1);
+		string SerijskiBroj = (const char*)sqlite3_column_text(stmt.get(), 2);
+		double Cijena = sqlite3_column_double(stmt.get(), 3);
 
 		cout << "ID:" << ID << endl;
 		cout << "Naziv Artikla:" << Naziv << endl;
@@ -130,10 +130,10 @@ int Baza::brojArtikala() {
 		cout << "GRESKA PRI PRIPREMI BROJANJA ARTIKALA:" << sqlite3_errmsg(db) << endl;
 		return -1;
 	}
-	StmtGuard stmt(rawStmt);
+	StmtPtr stmt(rawStmt);
 	int count = 0;
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmt, 0);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt.get(), 0);
 	}
 	return count;
 }
@@ -147,10 +147,10 @@ void Baza::DodajKupca(string ImePrezime, string JMBG) {
 		cout << "GRESKA PRI PRIPREMI PROVJERE:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmtProvjera(rawStmtProvjera);
-	sqlite3_bind_text(stmtProvjera, 1, JMBG.c_str(), -1, SQLITE_TRANSIENT);
-	if (sqlite3_step(stmtProvjera) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmtProvjera, 0);
+	StmtPtr stmtProvjera(rawStmtProvjera);
+	sqlite3_bind_text(stmtProvjera.get(), 1, JMBG.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmtProvjera.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmtProvjera.get(), 0);
 	}
 	if (count > 0) {
 		cout << "GRESKA PRI DODAVANJU KUPCA-KUPAC VEC POSTOJI" << endl;
@@ -164,11 +164,11 @@ void Baza::DodajKupca(string ImePrezime, string JMBG) {
 		cout << "GRESKA PRI PRIPREMI PROVJERE:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
-	sqlite3_bind_text(stmt, 1, ImePrezime.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmt, 2, JMBG.c_str(), -1, SQLITE_TRANSIENT);
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, ImePrezime.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt.get(), 2, JMBG.c_str(), -1, SQLITE_TRANSIENT);
 
-	rc1 = sqlite3_step(stmt);
+	rc1 = sqlite3_step(stmt.get());
 	if (rc1 != SQLITE_DONE) {
 		cout << "GRESKA PRI DODAVANJU KUPCA:" << sqlite3_errmsg(db) << endl;
 		return;
@@ -184,11 +184,11 @@ void Baza::PrikaziSveKupce() {
 		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
-	while (sqlite3_step(stmt) == SQLITE_ROW) {
-		int ID = sqlite3_column_int(stmt, 0);
-		string ImePrezime = (const char*)sqlite3_column_text(stmt, 1);
-		string JMBG = (const char*)sqlite3_column_text(stmt, 2);
+	StmtPtr stmt(rawStmt);
+	while (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		int ID = sqlite3_column_int(stmt.get(), 0);
+		string ImePrezime = (const char*)sqlite3_column_text(stmt.get(), 1);
+		string JMBG = (const char*)sqlite3_column_text(stmt.get(), 2);
 
 		cout << "ID:" << ID << endl;
 		cout << "Ime i Prezime Kupca:" << ImePrezime << endl;
@@ -205,10 +205,10 @@ int Baza::brojKupaca() {
 		cout << "GRESKA PRI PRIPREMI BROJANJA KUPACA:" << sqlite3_errmsg(db) << endl;
 		return -1;
 	}
-	StmtGuard stmt(rawStmt);
+	StmtPtr stmt(rawStmt);
 	int count = 0;
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmt, 0);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt.get(), 0);
 	}
 	return count;
 }
@@ -224,10 +224,10 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
 		return;
 	}
-	StmtGuard stmtProvjeraKupca(rawStmtProvjeraKupca);
-	sqlite3_bind_text(stmtProvjeraKupca, 1, KupacJMBG.c_str(), -1, SQLITE_TRANSIENT);
-	if (sqlite3_step(stmtProvjeraKupca) == SQLITE_ROW) {
-		KupacID = sqlite3_column_int(stmtProvjeraKupca, 0);
+	StmtPtr stmtProvjeraKupca(rawStmtProvjeraKupca);
+	sqlite3_bind_text(stmtProvjeraKupca.get(), 1, KupacJMBG.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmtProvjeraKupca.get()) == SQLITE_ROW) {
+		KupacID = sqlite3_column_int(stmtProvjeraKupca.get(), 0);
 	}
 	if (KupacID == 0) {
 		cout << "GRESKA PRI DODAVANJU RACUNA-TRAZENI KUPAC NE POSTOJI" << endl;
@@ -243,11 +243,11 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
 		return;
 	}
-	StmtGuard stmtRacun(rawStmtRacun);
-	sqlite3_bind_text(stmtRacun, 1, to_string(KupacID).c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmtRacun, 2, BrojRacun.c_str(), -1, SQLITE_TRANSIENT);
-	sqlite3_bind_text(stmtRacun, 3, DatumKupovine.c_str(), -1, SQLITE_TRANSIENT);
-	rc1 = sqlite3_step(stmtRacun);
+	StmtPtr stmtRacun(rawStmtRacun);
+	sqlite3_bind_text(stmtRacun.get(), 1, to_string(KupacID).c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmtRacun.get(), 2, BrojRacun.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmtRacun.get(), 3, DatumKupovine.c_str(), -1, SQLITE_TRANSIENT);
+	rc1 = sqlite3_step(stmtRacun.get());
 	if (rc1 != SQLITE_DONE) {
 		cout << "GRESKA PRI DODAVANJU RACUNA:" << sqlite3_errmsg(db) << endl;
 		IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
@@ -269,10 +269,10 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
 			return;
 		}
-		StmtGuard stmtArtikal(rawStmtArtikal);
-		sqlite3_bind_text(stmtArtikal, 1, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
-		if (sqlite3_step(stmtArtikal) == SQLITE_ROW) {
-			ArtikalID = sqlite3_column_int(stmtArtikal, 0);
+		StmtPtr stmtArtikal(rawStmtArtikal);
+		sqlite3_bind_text(stmtArtikal.get(), 1, SerijskiBroj.c_str(), -1, SQLITE_TRANSIENT);
+		if (sqlite3_step(stmtArtikal.get()) == SQLITE_ROW) {
+			ArtikalID = sqlite3_column_int(stmtArtikal.get(), 0);
 		}
 		if (ArtikalID == 0) {
 			cout << "GRESKA PRI DODAVANJU STAVKI RACUNA-NE POSTOJI TRAZENI ARTIKAL" << endl;
@@ -288,11 +288,11 @@ void Baza::DodajRacunIStavkeRacuna(string KupacJMBG, string BrojRacun, string Da
 			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
 			return;
 		}
-		StmtGuard stmtStavke(rawStmtStavke);
-		sqlite3_bind_text(stmtStavke, 1, to_string(RacunID).c_str(), -1, SQLITE_TRANSIENT);
-		sqlite3_bind_text(stmtStavke, 2, to_string(ArtikalID).c_str(), -1, SQLITE_TRANSIENT);
-		sqlite3_bind_text(stmtStavke, 3, to_string(Kolicina).c_str(), -1, SQLITE_TRANSIENT);
-		rc3 = sqlite3_step(stmtStavke);
+		StmtPtr stmtStavke(rawStmtStavke);
+		sqlite3_bind_text(stmtStavke.get(), 1, to_string(RacunID).c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmtStavke.get(), 2, to_string(ArtikalID).c_str(), -1, SQLITE_TRANSIENT);
+		sqlite3_bind_text(stmtStavke.get(), 3, to_string(Kolicina).c_str(), -1, SQLITE_TRANSIENT);
+		rc3 = sqlite3_step(stmtStavke.get());
 		if (rc3 != SQLITE_DONE) {
 			cout << "GRESKA PRI DODAVANJU STAVKI RACUNA:" << sqlite3_errmsg(db) << endl;
 			IzvrsiUpit("ROLLBACK;", "GRESKA PRI ROLLBACK-u");
@@ -316,17 +316,17 @@ void Baza::PrikaziSveRacune() {
 		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
+	StmtPtr stmt(rawStmt);
 	string trenutniRacun = "";
 	double UkupanRacun = 0;
-	while (sqlite3_step(stmt)==SQLITE_ROW) {
-		string ImePrezime = (const char*)sqlite3_column_text(stmt, 0);
-		string BrojRacuna = (const char*)sqlite3_column_text(stmt, 1);
-		string Datum = (const char*)sqlite3_column_text(stmt, 2);
-		string Naziv = (const char*)sqlite3_column_text(stmt, 3);
-		string SerijskiBroj = (const char*)sqlite3_column_text(stmt, 4);
-		double Cijena = sqlite3_column_double(stmt, 5);
-		double Kolicina = sqlite3_column_double(stmt, 6);
+	while (sqlite3_step(stmt.get())==SQLITE_ROW) {
+		string ImePrezime = (const char*)sqlite3_column_text(stmt.get(), 0);
+		string BrojRacuna = (const char*)sqlite3_column_text(stmt.get(), 1);
+		string Datum = (const char*)sqlite3_column_text(stmt.get(), 2);
+		string Naziv = (const char*)sqlite3_column_text(stmt.get(), 3);
+		string SerijskiBroj = (const char*)sqlite3_column_text(stmt.get(), 4);
+		double Cijena = sqlite3_column_double(stmt.get(), 5);
+		double Kolicina = sqlite3_column_double(stmt.get(), 6);
 
 		
 		if (trenutniRacun != BrojRacuna) {
@@ -359,10 +359,10 @@ int Baza::BrojRacuna() {
 		cout << "GRESKA PRI BROJANJU RACUNA:" << sqlite3_errmsg(db) << endl;
 		return -1;
 	}
-	StmtGuard stmt(rawStmt);
+	StmtPtr stmt(rawStmt);
 	int count = 0;
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmt, 0);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt.get(), 0);
 	}
 	return count;
 }
@@ -375,10 +375,10 @@ int Baza::BrojStavkiRacuna() {
 		cout << "GRESKA PRI BROJANJU STAVKI RACUNA:" << sqlite3_errmsg(db) << endl;
 		return -1;
 	}
-	StmtGuard stmt(rawStmt);
+	StmtPtr stmt(rawStmt);
 	int count = 0;
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		count = sqlite3_column_int(stmt, 0);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		count = sqlite3_column_int(stmt.get(), 0);
 	}
 	return count;
 }
@@ -399,12 +399,12 @@ void Baza::PrikaziKupcaSaNajvecimTroskom() {
 		cout << "GRESKA PRI PRIPREMI PRIKAZA:" << sqlite3_errmsg(db) << endl;
 		return;
 	}
-	StmtGuard stmt(rawStmt);
-	if (sqlite3_step(stmt) == SQLITE_ROW) {
-		string ImePrezime = (const char*)sqlite3_column_text(stmt, 0);
-		string BrojRacuna = (const char*)sqlite3_column_text(stmt, 1);
-		string Datum = (const char*)sqlite3_column_text(stmt, 2);
-		double UkupanIznos = sqlite3_column_double(stmt, 3);
+	StmtPtr stmt(rawStmt);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		string ImePrezime = (const char*)sqlite3_column_text(stmt.get(), 0);
+		string BrojRacuna = (const char*)sqlite3_column_text(stmt.get(), 1);
+		string Datum = (const char*)sqlite3_column_text(stmt.get(), 2);
+		double UkupanIznos = sqlite3_column_double(stmt.get(), 3);
 
 		cout << "Ime i Prezime Kupca:" << ImePrezime << endl;
 		cout << "Broj Racuna:" << BrojRacuna << endl;
