@@ -4,7 +4,7 @@
 #include"Baza.h"
 using namespace std;
 int main() {
-	Baza baza;
+	Baza baza("C:\\Users\\enesb\\source\\repos\\RACUNI-SISTEM\\RACUNI-SISTEM\\RACUNI-SISTEM.db");
 	baza.KreirajTabele();
 	baza.KreirajIndex();
 	int izbor;

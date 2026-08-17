@@ -415,3 +415,101 @@ void Baza::PrikaziKupcaSaNajvecimTroskom() {
 		cout << "NEMA PODATAKA" << endl;
 	}
 }
+vector<Artikal>Baza::UzmiSveArtikle() {
+	vector<Artikal>rezultat;
+	sqlite3_stmt* rawStmt;
+	string sql =
+		"SELECT * FROM Artikli;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA ARTIKALA:" << sqlite3_errmsg(db) << endl;
+		return rezultat;
+	}
+	StmtPtr stmt(rawStmt);
+	while (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		Artikal a;
+		a.ID = sqlite3_column_int(stmt.get(), 0);
+		a.Naziv = (const char*)sqlite3_column_text(stmt.get(), 1);
+		a.SerijskiBroj = (const char*)sqlite3_column_text(stmt.get(), 2);
+		a.Cijena = sqlite3_column_double(stmt.get(), 3);
+		rezultat.push_back(a);
+	}
+	return rezultat;
+}
+vector<Kupac>Baza::UzmiSveKupce() {
+	vector<Kupac>rezultat;
+	sqlite3_stmt* rawStmt;
+	string sql =
+		"SELECT * FROM Kupci;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA KUPACA:" << sqlite3_errmsg(db) << endl;
+		return rezultat;
+	}
+	StmtPtr stmt(rawStmt);
+	while (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		Kupac k;
+		k.ID = sqlite3_column_int(stmt.get(), 0);
+		k.ImePrezime = (const char*)sqlite3_column_text(stmt.get(), 1);
+		k.JMBG = (const char*)sqlite3_column_text(stmt.get(), 2);
+		rezultat.push_back(k);
+	}
+	return rezultat;
+}
+vector<StavkaRacuna>Baza::UzmiSveStavke() {
+	vector<StavkaRacuna>rezultat;
+	sqlite3_stmt* rawStmt;
+	string sql =
+		"SELECT Kupci.ImePrezime, Racuni.BrojRacuna, Racuni.DatumKupovine, Artikli.Naziv, Artikli.SerijskiBroj, Artikli.Cijena, Stavke.Kolicina "
+		"FROM Racuni "
+		"JOIN Kupci ON Racuni.KupacID=Kupci.ID "
+		"JOIN Stavke ON Racuni.ID=Stavke.RacunID "
+		"JOIN Artikli ON Stavke.ArtikalID=Artikli.ID "
+		"ORDER BY Racuni.ID;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA STAVKI:" << sqlite3_errmsg(db) << endl;
+		return rezultat;
+	}
+	StmtPtr stmt(rawStmt);
+	while (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		StavkaRacuna s;
+		s.ImePrezime = (const char*)sqlite3_column_text(stmt.get(), 0);
+		s.BrojRacuna = (const char*)sqlite3_column_text(stmt.get(), 1);
+		s.DatumKupovine=(const char*)sqlite3_column_text(stmt.get(), 2);
+		s.NazivArtikla = (const char*)sqlite3_column_text(stmt.get(), 3);
+		s.SerijskiBroj = (const char*)sqlite3_column_text(stmt.get(), 4);
+		s.Cijena = sqlite3_column_double(stmt.get(), 5);
+		s.Kolicina = sqlite3_column_double(stmt.get(), 6);
+		rezultat.push_back(s);
+	}
+	return rezultat;
+}
+NajveciRacun Baza::UzmiNajveciRacun() {
+	NajveciRacun rezultat;
+	rezultat.UkupanIznosRacuna = 0;
+	sqlite3_stmt* rawStmt;
+	string sql=
+		"SELECT Kupci.ImePrezime, Racuni.BrojRacuna, Racuni.DatumKupovine, "
+		"SUM(Artikli.Cijena * Stavke.Kolicina) AS UkupanRacun "
+		"FROM Racuni "
+		"JOIN Kupci ON Racuni.KupacID=Kupci.ID "
+		"JOIN Stavke ON Racuni.ID=Stavke.RacunID "
+		"JOIN Artikli ON Stavke.ArtikalID=Artikli.ID "
+		"GROUP BY Racuni.ID "
+		"ORDER BY UkupanRacun DESC "
+		"LIMIT 1;";
+	int rc = sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr);
+	if (rc != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA NJAVECEG RACUNA:" << sqlite3_errmsg(db) << endl;
+		return rezultat;
+	}
+	StmtPtr stmt(rawStmt);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW){
+		rezultat.ImePrezimeKupca = (const char*)sqlite3_column_text(stmt.get(), 0);
+		rezultat.BrojRacuna = (const char*)sqlite3_column_text(stmt.get(), 1);
+		rezultat.DatumKupovine = (const char*)sqlite3_column_text(stmt.get(), 2);
+		rezultat.UkupanIznosRacuna = sqlite3_column_double(stmt.get(), 3);
+	}
+	return rezultat;
+}

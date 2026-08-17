@@ -4,5 +4,6 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="RACUNI-SISTEM/RACUNI-SISTEM.vcxproj" Id="bf906fb9-4b1f-45a1-b687-f321e2bc0a32" />
+  <Project Path="RACUNI-SISTEM_Server/RACUNI-SISTEM_Server.vcxproj" Id="e2e964da-6a59-4595-b009-7d040d717c54" />
   <Project Path="RACUNI-SISTEM_Testovi/RACUNI-SISTEM_Testovi.vcxproj" Id="4958240d-4737-497b-adf5-7b0cf0c59054" />
 </Solution>

@@ -5,6 +5,32 @@
 #include"sqlite3.h"
 #include "StmtPtr.h"
 using namespace std;
+struct Artikal {
+	int ID;
+	string Naziv;
+	string SerijskiBroj;
+	double Cijena;
+};
+struct Kupac {
+	int ID;
+	string ImePrezime;
+	string JMBG;
+};
+struct StavkaRacuna {
+	string ImePrezime;
+	string BrojRacuna;
+	string DatumKupovine;
+	string NazivArtikla;
+	string SerijskiBroj;
+	double Cijena;
+	double Kolicina;
+};
+struct NajveciRacun {
+	string ImePrezimeKupca;
+	string BrojRacuna;
+	string DatumKupovine;
+	double UkupanIznosRacuna;
+};
 class Baza {
 	sqlite3* db;
 public:
@@ -13,6 +39,10 @@ public:
 	void IzvrsiUpit(string sql, string PORUKAGRESKE);
 	void KreirajTabele();
 	void KreirajIndex();
+	vector<Artikal>UzmiSveArtikle();
+	vector<Kupac>UzmiSveKupce();
+	vector<StavkaRacuna>UzmiSveStavke();
+	NajveciRacun UzmiNajveciRacun();
 	void DodajArtikal(string Naziv, string SerijskiBroj, double Cijena);
 	void PrikaziSveArtikle();
 	int brojArtikala();
