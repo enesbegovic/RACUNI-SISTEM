@@ -22,6 +22,14 @@ jobs:
 
       - name: NuGet restore (test projekat)
         run: nuget restore RACUNI-SISTEM_Testovi\RACUNI-SISTEM_Testovi.vcxproj -PackagesDirectory packages
+      
+      - name: Instaliraj vcpkg i pakete
+              run: |
+                git clone https://github.com/microsoft/vcpkg.git C:\vcpkg
+                C:\vcpkg\bootstrap-vcpkg.bat
+                C:\vcpkg\vcpkg install cpp-httplib:x64-windows
+                C:\vcpkg\vcpkg install nlohmann-json:x64-windows
+                C:\vcpkg\vcpkg integrate install
 
       - name: Build solution
         run: msbuild RACUNI-SISTEM.slnx /p:Configuration=Release /p:Platform=x64
