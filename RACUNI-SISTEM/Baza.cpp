@@ -1,4 +1,5 @@
 #include<iostream>
+#include <stdexcept>
 #include<string>
 #include<vector>
 #include"Baza.h"
@@ -52,6 +53,14 @@ void Baza::KreirajTabele() {
 		"FOREIGN KEY (RacunID) REFERENCES Racuni(ID) ON DELETE CASCADE,"
 		"FOREIGN KEY (ArtikalID) REFERENCES Artikli(ID) ON DELETE RESTRICT);";
 	IzvrsiUpit(sqlStavkeRacuna, "PORUKA GRESKE");
+
+	string sqlKorisnici =
+		"CREATE TABLE IF NOT EXISTS Korisnici("
+		"ID INTEGER PRIMARY KEY AUTOINCREMENT,"
+		"UserName TEXT NOT NULL UNIQUE,"
+		"PassWordHash TEXT NOT NULL,"
+		"Uloga TEXT NOT NULL DEFAULT 'korisnik');";
+	IzvrsiUpit(sqlKorisnici, "GRESKA PRI KREIRANJU TABELE KORISNICI");
 }
 void Baza::KreirajIndex() {
 	IzvrsiUpit("CREATE INDEX IF NOT EXISTS idx_racuni_kupacid ON Kupci(ID);", "GRESKA PRI KREIRANJU INDEXA");
@@ -512,4 +521,68 @@ NajveciRacun Baza::UzmiNajveciRacun() {
 		rezultat.UkupanIznosRacuna = sqlite3_column_double(stmt.get(), 3);
 	}
 	return rezultat;
+}
+void Baza::DodajKorisnika(string UserName, string PassWordHash) {
+	sqlite3_stmt* rawStmt;
+	string sql =
+		"INSERT INTO Korisnici(UserName, PassWordHash) VALUES(?, ?);";
+	if (sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr) != SQLITE_OK) {
+		throw std::runtime_error(sqlite3_errmsg(db));
+	}
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, UserName.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt.get(), 2, PassWordHash.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmt.get()) != SQLITE_DONE) {
+		throw std::runtime_error(sqlite3_errmsg(db));
+	}
+	cout << "KORISNIK USPIJESNO DODAN" << endl;
+}
+string Baza::UzmiHash(string UserName) {
+	sqlite3_stmt* rawStmt;
+	string PassWord = "";
+	string sql =
+		"SELECT PassWordHash FROM Korisnici WHERE UserName=?;";
+	if (sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr) != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA PASSWORD-a:" << sqlite3_errmsg(db) << endl;
+		return PassWord;
+	}
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, UserName.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		PassWord = (const char*)sqlite3_column_text(stmt.get(), 0);
+	}
+	return PassWord;
+}
+void Baza::DodijeliUlogu(string Username, string Uloga) {
+	sqlite3_stmt* rawStmt;
+	string sql =
+		"UPDATE Korisnici SET Uloga=? WHERE UserName=?;";
+	if (sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr)!=SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI DODJELJIVANJA ULOGE:" << sqlite3_errmsg(db) << endl;
+		return;
+	}
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, Uloga.c_str(), -1, SQLITE_TRANSIENT);
+	sqlite3_bind_text(stmt.get(), 2, Username.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmt.get()) != SQLITE_DONE) {
+		cout << "GRESKA PRI DODJELJIVANJU ULOGE:" << sqlite3_errmsg(db) << endl;
+		return;
+	}
+	cout << "ULOGA USPIJESNO POSTAVLJENA" << endl;
+}
+string Baza::UzmiUlogu(string UserName) {
+	sqlite3_stmt* rawStmt;
+	string Uloga = "";
+	string sql =
+		"SELECT Uloga FROM Korisnici WHERE UserName=?;";
+	if (sqlite3_prepare_v2(db, sql.c_str(), -1, &rawStmt, nullptr) != SQLITE_OK) {
+		cout << "GRESKA PRI PRIPREMI UZIMANJA ULOGE:" << sqlite3_errmsg(db) << endl;
+		return Uloga;
+	}
+	StmtPtr stmt(rawStmt);
+	sqlite3_bind_text(stmt.get(), 1, UserName.c_str(), -1, SQLITE_TRANSIENT);
+	if (sqlite3_step(stmt.get()) == SQLITE_ROW) {
+		Uloga = (const char*)sqlite3_column_text(stmt.get(), 0);
+	}
+	return Uloga;
 }
