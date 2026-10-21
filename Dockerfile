@@ -9,6 +9,12 @@ RUN apt-get update && apt-get install -y \
     unzip \
     tar \
     pkg-config \
+    make \
+    autoconf \
+    autoconf-archive \
+    automake \
+    libtool \
+    libtool-bin \
     && rm -rf /var/lib/apt/lists/*
 
 # Instaliraj vcpkg
@@ -16,7 +22,7 @@ RUN git clone https://github.com/microsoft/vcpkg.git /vcpkg \
     && /vcpkg/bootstrap-vcpkg.sh
 
 # Instaliraj biblioteke preko vcpkg-a
-RUN /vcpkg/vcpkg install cpp-httplib nlohmann-json
+RUN /vcpkg/vcpkg install cpp-httplib nlohmann-json libsodium
 
 # Kopiraj SAMO fajlove koji su nam potrebni za server
 WORKDIR /app
@@ -29,7 +35,7 @@ RUN g++ -std=c++17 -o racuniSistemServer \
     Server.cpp Baza.cpp sqlite3.o \
     -I/vcpkg/installed/x64-linux/include \
     -L/vcpkg/installed/x64-linux/lib \
-    -lpthread -ldl
+    -lsodium -lpthread -ldl
 
 # Faza 2: finalna, lagana slika
 FROM ubuntu:22.04
