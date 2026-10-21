@@ -3,7 +3,7 @@
 #include "Baza.h"
 using json = nlohmann::json;
 int main() {
-	Baza baza("C:\\Users\\enesb\\source\\repos\\RACUNI-SISTEM\\RACUNI-SISTEM\\RACUNI-SISTEM.db");
+	Baza baza("RACUNI-SISTEM.db");
 	baza.KreirajTabele();
 	baza.KreirajIndex();
 	httplib::Server server;
@@ -139,6 +139,6 @@ int main() {
 		res.set_content(rezultat.dump(4), "application/json");
 		});
 	std::cout << "Server pokrenut na http:://localhost:8080" << std::endl;
-	server.listen("localhost", 8080);
+	server.listen("0.0.0.0", 8080);
 	return 0;
 }
