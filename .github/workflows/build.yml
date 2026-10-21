@@ -31,6 +31,11 @@ jobs:
           C:\vcpkg\vcpkg install nlohmann-json:x64-windows
           C:\vcpkg\vcpkg integrate install
 
+      - name: Osvjezi vcpkg katalog
+        run: |
+          git -C C:\vcpkg fetch origin
+          git -C C:\vcpkg checkout e456309491fd875487bf02b8a0dca76c1b1b00cc
+
       - name: Build solution
         run: msbuild RACUNI-SISTEM.slnx /p:Configuration=Release /p:Platform=x64
 
