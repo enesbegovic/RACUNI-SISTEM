@@ -18,7 +18,12 @@ int main() {
 		string Uloga;
 		std::chrono::steady_clock::time_point vrijeme;
 	};
+	struct Pokusaji {
+		int brojPokusaja = 0;
+		std::chrono::steady_clock::time_point Blodakado{};
+	};
 	std::map<string, Sesija>sesije;
+	std::map<string, Pokusaji>pokusaji;
 	std::mutex sesijeMutex;
 	baza.KreirajTabele();
 	baza.KreirajIndex();
@@ -79,13 +84,36 @@ int main() {
 			res.set_content(Greska.dump(4), "application/json");
 		}
 		});
-	server.Post("/login", [&baza, &sesije, &sesijeMutex](const httplib::Request& req, httplib::Response& res) {
+	server.Post("/login", [&baza, &sesije, &sesijeMutex, &pokusaji](const httplib::Request& req, httplib::Response& res) {
 		try {
 			json tijelo = json::parse(req.body);
 			string UserName = tijelo.at("username");
 			string PassWord = tijelo.at("password");
+			auto sada = std::chrono::steady_clock::now();
+			{
+				std::lock_guard<mutex>lock(sesijeMutex);
+				auto it = pokusaji.find(UserName);
+				if (it != pokusaji.end() && it->second.brojPokusaja >= 5) {
+					if (it->second.Blodakado > sada) {
+						auto ostatak = std::chrono::duration_cast<std::chrono::seconds>(it->second.Blodakado - sada).count();
+						res.status = 429;
+						res.set_header("Retry-After", to_string(ostatak));
+						res.set_content("{\"Greska\":\"Previse neuspijelih pokusaja, pokusajte kasnije\"}", "application/json");
+						return;
+					}
+					pokusaji.erase(it);
+				}
+			}
 			string hash = baza.UzmiHash(UserName);
 			if (hash.empty() || crypto_pwhash_str_verify(hash.c_str(), PassWord.c_str(), PassWord.size()) != 0) {
+				{
+					std::lock_guard<mutex>lock(sesijeMutex);
+					auto&p = pokusaji[UserName];
+					p.brojPokusaja++;
+					if (p.brojPokusaja >= 5) {
+						p.Blodakado = sada + std::chrono::minutes(10);
+					}
+				}
 				res.status = 401;
 				res.set_content("{\"Greska\":\"Pogresno korisnicko ime ili lozinka\"}", "application/json");
 				return;
@@ -97,6 +125,7 @@ int main() {
 			string Uloga = baza.UzmiUlogu(UserName);
 			{
 				std::lock_guard<mutex>lock(sesijeMutex);
+				pokusaji.erase(UserName);
 				for (auto it = sesije.begin(); it != sesije.end();) {
 					if (it->second.vrijeme < std::chrono::steady_clock::now()) {
 						it = sesije.erase(it);
