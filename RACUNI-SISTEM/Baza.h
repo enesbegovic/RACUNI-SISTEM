@@ -56,6 +56,7 @@ public:
 	void PrikaziKupcaSaNajvecimTroskom();
 	void DodajKorisnika(string UserName, string PassWordHash);
 	string UzmiHash(string UserName);
-	void DodijeliUlogu(string UserName, string Uloga);
+	bool DodijeliUlogu(string UserName, string Uloga);
 	string UzmiUlogu(string UserName);
+	int BrojAdmina(string admin);
 };
